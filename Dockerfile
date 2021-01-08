@@ -17,7 +17,7 @@ ENV JETTY_HOME=/opt/jetty-home \
 RUN wget -q https://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-distribution/$jetty_version/jetty-distribution-$jetty_version.tar.gz \
     && echo "$jetty_hash  jetty-distribution-$jetty_version.tar.gz" | sha1sum -c - \
     && tar -zxvf jetty-distribution-$jetty_version.tar.gz -C /opt \
-    && ln -s /opt/jetty-distribution-$jetty_version/ /opt/jetty-home \
+    && mv /opt/jetty-distribution-$jetty_version/ $JETTY_HOME \
     && rm -f jetty-distribution-$jetty_version.tar.gz
 
 # Clone the "best practice" Jetty configuration, build with Maven and copy results to $JETTY_BASE
@@ -36,7 +36,7 @@ COPY opt/shib-jetty-base $JETTY_BASE
 RUN wget -q https://shibboleth.net/downloads/identity-provider/$idp_version/shibboleth-identity-provider-$idp_version.tar.gz \
     && echo "$idp_hash  shibboleth-identity-provider-$idp_version.tar.gz" | sha256sum -c - \
     && tar -zxvf shibboleth-identity-provider-$idp_version.tar.gz -C /opt \
-    && ln -s /opt/shibboleth-identity-provider-$idp_version $IDP_SRC \
+    && mv /opt/shibboleth-identity-provider-$idp_version $IDP_SRC \
     && $IDP_SRC/bin/install.sh \
         -Didp.noprompt=true \
         -Didp.scope=local \
