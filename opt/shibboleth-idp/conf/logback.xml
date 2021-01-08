@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- Customised logback file to send all logs to console for running within Docker -->
+
     <!--
     Variables for simplifying logging configuration.
     http://logback.qos.ch/manual/configuration.html#variableSubstitution
@@ -14,7 +16,7 @@
 
     <!-- Location and retention. -->
     
-    <variable name="idp.logfiles" value="${idp.logfiles:-${idp.home}/logs}" />
+    <variable name="idp.logfiles" value="${idp.home}/logs" />
     <variable name="idp.loghistory" value="${idp.loghistory:-180}" />
     
     <!-- Much higher performance if you operate on DEBUG. -->
@@ -60,7 +62,6 @@
     <logger name="net.shibboleth.idp.log.LogbackLoggingService" level="${idp.loglevel.props}" />
 
     <!-- Especially chatty. -->
-    <logger name="net.shibboleth.idp.saml.attribute.mapping" level="INFO" />
     <logger name="org.apache.xml.security" level="${idp.loglevel.xmlsec}" />
     <logger name="org.springframework" level="${idp.loglevel.spring}"/>
     <logger name="org.apache.catalina" level="${idp.loglevel.container}"/>
@@ -83,7 +84,7 @@
             <evaluator>
                 <matcher>
                     <Name>VelocityStatusMatcher</Name>
-                    <regex>ResourceManager : unable to find resource 'status.vm' in any resource loader.</regex>
+                    <regex>ResourceManager\s*: unable to find resource 'status\.vm' in any resource loader\.</regex>
                 </matcher>
                 <expression>VelocityStatusMatcher.matches(formattedMessage)</expression>
             </evaluator>
@@ -94,6 +95,46 @@
     <appender name="ASYNC_PROCESS" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="IDP_PROCESS" />
         <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <appender name="IDP_WARN" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Suppress anything below WARN. -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%date{ISO8601} - %mdc{idp.remote_addr} - %level [%logger:%line] - %msg%n%ex{full}</Pattern>
+        </encoder>
+        
+        <!-- Ignore Velocity status page error. -->
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <matcher>
+                    <Name>VelocityStatusMatcher</Name>
+                    <regex>ResourceManager\s*: unable to find resource 'status\.vm' in any resource loader\.</regex>
+                </matcher>
+                <expression>VelocityStatusMatcher.matches(formattedMessage)</expression>
+            </evaluator>
+            <OnMatch>DENY</OnMatch>
+        </filter>
+    </appender>
+    
+    <!-- Audit log. -->
+    <appender name="IDP_AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%msg%n</Pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Consent audit log. -->
+    <appender name="IDP_CONSENT_AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <Pattern>%msg%n</Pattern>
+        </encoder>
     </appender>
 
     <!-- F-TICKS syslog destination. -->
