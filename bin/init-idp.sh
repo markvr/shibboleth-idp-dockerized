@@ -19,5 +19,5 @@ cp -r $TARGET_DIR/views/ $EXPORT_DIR/
 cp -r $TARGET_DIR/edit-webapp/ $EXPORT_DIR/
 
 
-echo "User editable config files and UI have been copied to ./customized-shibboleth-idp/ (assuming the default volume mapping was used)."
+echo "Export complete"
 echo "Files that are not customized can be removed from what was exported, the default file in the Docker image will be used instead"
