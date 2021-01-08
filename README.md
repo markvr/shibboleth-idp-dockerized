@@ -51,7 +51,7 @@ You can use this image as a base image for one's own IdP deployment. Assuming th
 
 Next, create a Dockerfile similar to this example:
 
-    FROM <image>
+    FROM ghcr.io/markvr/shibboleth-idp-dockerized:latest
 
     ADD opt/ /opt/
     RUN $IDP_HOME/bin/build.sh
@@ -71,6 +71,23 @@ But this will likely fail to start unless you choose the default password of `ch
 ## Browser Certificate
 
 This image expects to find the TLS certificate and key for browser based communication in `/opt/shibboleth-idp/credentials/idp-browser.p12`. A self-signed certificate has been generated automatically, but this isn't suitable for a production deployment.  If you are not running the IdP behind a load balancer which offloads the SSL then this certificate needs to be replaced with a suitable one from a Certificate Authority.
+
+## Exporting and running from external configuration
+
+Shibboleth has a LOT of configuration and it can be difficult to develop and debug configuration having to build it into an image first each time.
+
+To simplify this, you can export a complete installation of Jetty and Shibboleth to your host system, and then mount and run this within a container.
+
+Export:
+
+    mkdir opt-export
+    docker run -v $(pwd)/opt-export:/ext-mount <image> export.sh
+
+Then to run from this config:
+
+    docker run -v $(pwd)/opt-export:/opt <image>
+
+You can then easily edit and run using this full configuration, before transferring any changes to your custom image.
 
 ## Run-time Parameters
 
@@ -135,7 +152,9 @@ This is slightly tricky to using Docker, but the basic process is:
 
 ### Mount this into this v4 image and run the upgrade on it
 
-    docker run -v $(pwd)/v3-export:/opt/shibboleth-idp <this image> /opt/shibboleth-idp-src/bin/install.sh
+    docker run -v $(pwd)/v3-export:/opt/shibboleth-idp \
+      ghcr.io/markvr/shibboleth-idp-dockerized:latest \
+      /opt/shibboleth-idp-src/bin/install.sh
 
 This will prompt for the source and target locations - accept the defaults - and then it should detect a v3 to v4 upgrade.
 
@@ -152,4 +171,3 @@ You only need the following folders:
 - `views`
 
 The remaining folders contain system or binary files that are in the upstream image.
-
