@@ -6,6 +6,8 @@ This repository has been forked from [Unicon](https://github.com/Unicon/shibbole
 
 This fork attempts to maintain backwards compatibility with the Unicon image, to make upgrading to v4 as easy as possible.  
 
+See the end of this file for v3 to v4 upgrade instructions.
+
 ## Creating a Shibboleth IdP Configuration
 
 Assuming that you do not already have one, create your initial IdP configuration by run with:
@@ -117,3 +119,37 @@ To extract out passwords, you'll want to modify the `conf/idp.properties` file, 
 > Note the **/ext-conf/** changes/additions in the property.
 
 This tells the IdP to look into the `/opt/shibboleth-idp/ext-conf/` directory for the `idp-secrets.properties` and `ldap.properties` files. To mount the ext-conf directory, add `-v <Host_ext-config_directory>:/opt/shibboleth-idp/ext-conf` to the start-up parameters.
+
+## Upgrading from v3
+
+Read the [upstream documentation](https://wiki.shibboleth.net/confluence/display/IDP4/Upgrading) first, which contains important information.
+
+The Shibboleth documentation contains warnings that you must not attempt to just run a v4 IdP using v3 config, but must run the installer on the v3 config in an upgrade mode to modify it suitable for v4.
+
+This is slightly tricky to using Docker, but the basic process is:
+
+### Export a complete set of config from your v3 image to the Docker host
+
+    mkdir -p $(pwd)/v3-export
+    docker run -v $(pwd)/v3-export:/ext-mount <your v3 image> sh -c "cp -r /opt/shibboleth-idp/* /ext-mount/"
+
+### Mount this into this v4 image and run the upgrade on it
+
+    docker run -v $(pwd)/v3-export:/opt/shibboleth-idp <this image> /opt/shibboleth-idp-src/bin/install.sh
+
+This will prompt for the source and target locations - accept the defaults - and then it should detect a v3 to v4 upgrade.
+
+### Build a v4 image with the upgraded config
+
+Similar to the instructions above under "Using the image", move or copy relevant folders from this upgraded config to `opt/shibboleth-idp` in your source repo, and edit your Dockerfile to add this into your image.
+
+You only need the following folders:
+
+- `conf`
+- `credentials`
+- `edit-webapp`
+- `metadata`
+- `views`
+
+The remaining folders contain system or binary files that are in the upstream image.
+
