@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- Customised logback file to send all logs to console for running within Docker -->
-
     <!--
     Variables for simplifying logging configuration.
     http://logback.qos.ch/manual/configuration.html#variableSubstitution
@@ -73,7 +71,14 @@
     <!-- =========================================================== -->
     
     <!-- Process log. -->
-    <appender name="IDP_PROCESS" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="IDP_PROCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${idp.logfiles}/idp-process.log</File>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/idp-process-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory}</maxHistory>
+        </rollingPolicy>
+
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
             <Pattern>%date{ISO8601} - %mdc{idp.remote_addr} - %level [%logger:%line] - %msg%n%ex{short}</Pattern>
@@ -97,11 +102,18 @@
         <discardingThreshold>0</discardingThreshold>
     </appender>
 
-    <appender name="IDP_WARN" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="IDP_WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- Suppress anything below WARN. -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>
         </filter>
+        
+        <File>${idp.logfiles}/idp-warn.log</File>
+        
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/idp-warn-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory}</maxHistory>
+        </rollingPolicy>
         
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
@@ -122,7 +134,14 @@
     </appender>
     
     <!-- Audit log. -->
-    <appender name="IDP_AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="IDP_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${idp.logfiles}/idp-audit.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/idp-audit-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory}</maxHistory>
+        </rollingPolicy>
+
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
             <Pattern>%msg%n</Pattern>
@@ -130,7 +149,14 @@
     </appender>
     
     <!-- Consent audit log. -->
-    <appender name="IDP_CONSENT_AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="IDP_CONSENT_AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${idp.logfiles}/idp-consent-audit.log</File>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${idp.logfiles}/idp-consent-audit-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>${idp.loghistory}</maxHistory>
+        </rollingPolicy>
+
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
             <Pattern>%msg%n</Pattern>
