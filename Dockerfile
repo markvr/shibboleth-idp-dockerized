@@ -5,7 +5,7 @@ ENV jetty_version=9.4.35.v20201120 \
     idp_version=4.0.1 \
     idp_hash=832f73568c5b74a616332258fd9dc555bb20d7dd9056c18dc0ccf52e9292102a
 
-RUN yum -y install wget tar which java-11-openjdk maven git && \
+RUN yum -y -q install wget tar which java-11-openjdk maven git openssl && \
     update-alternatives --set java java-11-openjdk.x86_64
 
 ENV JETTY_HOME=/opt/jetty-home \
@@ -26,7 +26,7 @@ RUN wget -q https://repo.maven.apache.org/maven2/org/eclipse/jetty/jetty-distrib
 RUN git clone https://git.shibboleth.net/git/java-idp-jetty-base.git /tmp/java-idp-jetty-base && \
     cd /tmp/java-idp-jetty-base && \
     git checkout 9.4.0 && \
-    mvn package && \
+    mvn -B -q package && \
     cp -r target/idp-jetty-base/jetty-base $JETTY_BASE
 
 # Copy over custom config for running in Docker
@@ -62,7 +62,7 @@ RUN chmod +x /opt/bin/*
 FROM centos:centos8
 
 RUN yum -y update \
-    && yum -y install which java-11-openjdk \
+    && yum -y -q install which java-11-openjdk \
     && yum -y clean all
 
 ENV PATH=$PATH:/opt/bin \
